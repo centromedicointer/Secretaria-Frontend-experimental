@@ -1,0 +1,4 @@
+project_id = "vdrfdlpwycoghtpqdgvx"
+
+[functions.google-calendar]
+# Esta función requiere autenticación y usa los secretos configurados
