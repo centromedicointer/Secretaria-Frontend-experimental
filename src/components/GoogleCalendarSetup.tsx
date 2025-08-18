@@ -46,7 +46,7 @@ export const GoogleCalendarSetup: React.FC<GoogleCalendarSetupProps> = ({
     console.log('🚀 authenticateWithGoogle called!');
     try {
       // Configuración OAuth2 para Google Calendar
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '685890439917-nknlc9rp9ceas2tv43pl83shtposbgpv.apps.googleusercontent.com';
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const redirectUri = `${window.location.origin}/google-auth-callback.html`;
       const scope = 'https://www.googleapis.com/auth/calendar';
       
