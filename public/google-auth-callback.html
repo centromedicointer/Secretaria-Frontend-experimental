@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación Google Calendar</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            margin: 1rem;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            color: #059669;
+            font-size: 48px;
+            margin-bottom: 1rem;
+        }
+        .error {
+            color: #dc2626;
+            font-size: 48px;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        .close-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .close-btn:hover {
+            background: #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" style="display: block;">
+            <div class="spinner"></div>
+            <h1>Procesando autenticación...</h1>
+            <p>Conectando con Google Calendar</p>
+        </div>
+        
+        <div id="success" style="display: none;">
+            <div class="success">✓</div>
+            <h1>¡Autenticación exitosa!</h1>
+            <p>Ya puedes cerrar esta ventana</p>
+            <button class="close-btn" onclick="window.close()">Cerrar ventana</button>
+        </div>
+        
+        <div id="error" style="display: none;">
+            <div class="error">✗</div>
+            <h1>Error de autenticación</h1>
+            <p id="error-message">No se pudo completar la autenticación</p>
+            <button class="close-btn" onclick="window.close()">Cerrar ventana</button>
+        </div>
+    </div>
+
+    <script>
+        async function handleGoogleCallback() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const error = urlParams.get('error');
+                
+                if (error) {
+                    throw new Error(`Error de autorización: ${error}`);
+                }
+
+                if (!code) {
+                    throw new Error('No se recibió código de autorización');
+                }
+
+                // Intercambiar código por tokens
+                const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        client_id: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+                        client_secret: 'YOUR_GOOGLE_CLIENT_SECRET_HERE',
+                        code: code,
+                        grant_type: 'authorization_code',
+                        redirect_uri: `${window.location.origin}/google-auth-callback.html`,
+                    }),
+                });
+
+                if (!tokenResponse.ok) {
+                    const errorData = await tokenResponse.json();
+                    throw new Error(`Error al obtener tokens: ${errorData.error_description || tokenResponse.statusText}`);
+                }
+
+                const tokens = await tokenResponse.json();
+                
+                // Enviar tokens al parent window
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'GOOGLE_AUTH_SUCCESS',
+                        tokens: tokens
+                    }, window.location.origin);
+                }
+                
+                // Mostrar éxito
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+                
+                // Auto-cerrar después de 3 segundos
+                setTimeout(() => {
+                    window.close();
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Google auth callback error:', error);
+                
+                // Mostrar error
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error-message').textContent = error.message;
+                
+                // Enviar error al parent window
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'GOOGLE_AUTH_ERROR',
+                        error: error.message
+                    }, window.location.origin);
+                }
+            }
+        }
+
+        // Ejecutar cuando la página carga
+        handleGoogleCallback();
+    </script>
+</body>
+</html>

@@ -214,6 +214,29 @@ app.get('/api/dashboard-secretaria', async (req, res) => {
   }
 });
 
+// Endpoint de compatibilidad Supabase -> PostgreSQL
+app.post('/api/supabase-query', async (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+
+    console.log('🔄 Executing Supabase-compatibility query:', query.substring(0, 100) + '...');
+    
+    const result = await query(query);
+    
+    res.json({ 
+      data: result.rows,
+      count: result.rowCount 
+    });
+  } catch (error) {
+    console.error('Error executing compatibility query:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Rutas de administración
 app.get('/api/admin/users', async (req, res) => {
   try {

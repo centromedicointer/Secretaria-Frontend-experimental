@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import { GoogleAuthCallback } from "./pages/GoogleAuthCallback";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardProtectedRoute from "./components/DashboardProtectedRoute";
 

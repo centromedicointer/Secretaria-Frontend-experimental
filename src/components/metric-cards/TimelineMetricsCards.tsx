@@ -9,7 +9,7 @@ export function TimelineMetricsCards() {
   const { data: timelineData } = useQuery({
     queryKey: ['timeline-raw-data'],
     queryFn: async () => {
-      const response = await fetch('/api/supabase-read-query', {
+      const response = await fetch('http://localhost:3001/api/supabase-query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

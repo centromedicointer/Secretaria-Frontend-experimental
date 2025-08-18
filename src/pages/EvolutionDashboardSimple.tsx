@@ -13,7 +13,7 @@ import { Shield, ShieldOff, UserX, MessageSquare, TrendingUp, Clock, Users, Cale
 import { ClientControlModal } from '@/components/ClientControlModal';
 import { ActiveClientControlModal } from '@/components/ActiveClientControlModal';
 import { useToast } from '@/hooks/use-toast';
-import { GoogleCalendarWidget } from '@/components/GoogleCalendarWidget';
+import { GoogleCalendarManager } from '@/components/GoogleCalendarManager';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 import { N8nMessagesModal } from '@/components/N8nMessagesModal';
 import { formatDateTimeInMexicoTime } from '@/lib/dateUtils';
@@ -391,12 +391,10 @@ const { toast } = useToast();
               <CardContent className="p-0">
                 <div className="px-6 py-4 border-b">
                   <h2 className="text-xl font-semibold">Calendario de Google</h2>
-                  <p className="text-sm text-muted-foreground">Agenda compartida</p>
+                  <p className="text-sm text-muted-foreground">Agenda compartida - Configurable</p>
                 </div>
                 <div className="p-6">
-                  <GoogleCalendarWidget
-                    calendarId="b85b44b029722927f9d30cc094a208c641ab35d1447e7a09115b0d39c2209033@group.calendar.google.com"
-                  />
+                  <GoogleCalendarManager />
                 </div>
               </CardContent>
             </Card>
