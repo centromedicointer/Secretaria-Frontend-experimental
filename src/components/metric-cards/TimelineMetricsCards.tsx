@@ -17,13 +17,13 @@ export function TimelineMetricsCards() {
         body: JSON.stringify({
           query: `
             SELECT 
-              evento_tipo,
-              usuario_origen,
-              fecha_evento,
-              google_event_id,
+              event_type as evento_tipo,
+              user_id as usuario_origen,
+              event_timestamp as fecha_evento,
+              appointment_id as google_event_id,
               created_at
             FROM appointment_timeline 
-            WHERE fecha_evento >= NOW() - INTERVAL '7 days'
+            WHERE event_timestamp >= NOW() - INTERVAL '7 days'
           `
         })
       });

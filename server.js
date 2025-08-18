@@ -217,15 +217,15 @@ app.get('/api/dashboard-secretaria', async (req, res) => {
 // Endpoint de compatibilidad Supabase -> PostgreSQL
 app.post('/api/supabase-query', async (req, res) => {
   try {
-    const { query } = req.body;
+    const { query: sqlQuery } = req.body;
     
-    if (!query) {
+    if (!sqlQuery) {
       return res.status(400).json({ error: 'Query is required' });
     }
 
-    console.log('🔄 Executing Supabase-compatibility query:', query.substring(0, 100) + '...');
+    console.log('🔄 Executing Supabase-compatibility query:', sqlQuery.substring(0, 100) + '...');
     
-    const result = await query(query);
+    const result = await query(sqlQuery);
     
     res.json({ 
       data: result.rows,
