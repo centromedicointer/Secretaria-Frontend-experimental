@@ -1,10 +1,12 @@
 # CLAUDE.md - Frontend Dashboard
 
-This file provides guidance to Claude Code when working with the React dashboard in this directory.
+This file provides guidance to Claude Code when working with the React dashboard in this **SEPARATE** repository.
 
 ## Project Overview
 
 This is the **React Dashboard** for the WhatsApp Enterprise System - a real-time data visualization and monitoring interface that connects to the PostgreSQL database via Supabase.
+
+**Repository Structure**: This frontend is now in a separate repository from the main backend system for independent development and deployment.
 
 ## Architecture
 
