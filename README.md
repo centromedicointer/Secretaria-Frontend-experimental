@@ -1,74 +1,127 @@
-# Welcome to your Lovable project
+# Secretaria Frontend Experimental 🧪
 
-## Project info
+Dashboard experimental para el Sistema WhatsApp Enterprise - Interfaz React con integración PostgreSQL y Google Calendar.
 
-**URL**: https://lovable.dev/projects/5b0d1aaf-7124-4084-b94e-997c5ddf700e
+## 🚀 Características
 
-## How can I edit this code?
+- **Dashboard en tiempo real** con métricas de WhatsApp
+- **Integración PostgreSQL** directa (migrado desde Supabase)
+- **Google Calendar** con autenticación OAuth2
+- **Componentes reactivos** con React Query
+- **Interfaz moderna** con Tailwind CSS
 
-There are several ways of editing your application.
+## 🛠️ Tecnologías
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Backend**: Node.js + Express + PostgreSQL
+- **Autenticación**: Google OAuth2
+- **Base de datos**: PostgreSQL con conexión directa
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5b0d1aaf-7124-4084-b94e-997c5ddf700e) and start prompting.
+## 📦 Instalación
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# Clonar el repositorio
+git clone https://github.com/centromedicointer/Secretaria-Frontend-experimental.git
+cd Secretaria-Frontend-experimental
 
-**Use your preferred IDE**
+# Instalar dependencias
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Configurar variables de entorno
+cp .env.example .env.local
 ```
 
-**Edit a file directly in GitHub**
+## ⚙️ Configuración
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Variables de Entorno (.env.local)
 
-**Use GitHub Codespaces**
+```env
+# Google Calendar OAuth
+VITE_GOOGLE_CLIENT_ID=tu-google-client-id
+VITE_GOOGLE_CLIENT_SECRET=tu-google-client-secret
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# PostgreSQL Connection (ya configurada para el servidor de producción)
+DATABASE_URL=postgresql://postgres:password@host:5432/database
+```
 
-## What technologies are used for this project?
+### Configuración de Google Calendar
 
-This project is built with:
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un nuevo proyecto o selecciona uno existente
+3. Habilita la API de Google Calendar
+4. Crea credenciales OAuth2
+5. Configura la URI de redirección: `http://localhost:8082/google-auth-callback.html`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Configuración del archivo callback
 
-## How can I deploy this project?
+Edita `public/google-auth-callback.html` y reemplaza:
 
-Simply open [Lovable](https://lovable.dev/projects/5b0d1aaf-7124-4084-b94e-997c5ddf700e) and click on Share -> Publish.
+```javascript
+client_id: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+client_secret: 'YOUR_GOOGLE_CLIENT_SECRET_HERE',
+```
 
-## Can I connect a custom domain to my Lovable project?
+Con tus credenciales reales de Google OAuth.
 
-Yes, you can!
+## 🚀 Desarrollo
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```bash
+# Iniciar frontend (puerto 8082)
+npm run dev
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-jhgfas
+# Iniciar backend API (puerto 3001)
+node server.js
+```
+
+## 📊 Arquitectura
+
+```
+PostgreSQL Database → Express API → React Dashboard
+                           ↓
+                    Google Calendar API
+```
+
+## 🔧 Características Principales
+
+### Dashboard Metrics
+- Métricas de evolución en tiempo real
+- Estadísticas de mensajes WhatsApp
+- Control de workflows n8n
+- Estadísticas de usuarios únicos
+
+### Google Calendar
+- Autenticación OAuth2 completa
+- Selección de calendarios
+- Visualización de eventos
+- Integración directa con Google Calendar API
+
+### Base de Datos
+- Migración completa de Supabase a PostgreSQL
+- Capa de compatibilidad para queries existentes
+- Conexión directa sin intermediarios
+
+## 🔒 Seguridad
+
+- Variables de entorno para credenciales sensibles
+- Autenticación OAuth2 con Google
+- Conexión segura a PostgreSQL
+- No hay credenciales hardcodeadas en el código fuente
+
+## 🚨 Importante - Configuración de Producción
+
+Este es un proyecto **experimental**. Para producción:
+
+1. Usar variables de entorno para todas las credenciales
+2. Configurar HTTPS para OAuth callbacks
+3. Implementar rate limiting en la API
+4. Configurar CORS apropiadamente
+5. Usar certificados SSL para PostgreSQL
+
+## 📝 Desarrollo
+
+Creado como separación experimental del sistema principal para desarrollo independiente del frontend.
+
+## 🤝 Contribución
+
+Este es un repositorio experimental. Los cambios se pueden integrar al sistema principal después de pruebas exitosas.
