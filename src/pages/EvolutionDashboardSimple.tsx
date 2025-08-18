@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BarChart3 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { WorkflowControlCard } from '@/components/metric-cards/WorkflowControlCard';
 
 import { ClientControlHoverCard } from '@/components/ClientControlHoverCard';
@@ -58,15 +57,11 @@ const { toast } = useToast();
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['evolution-metrics'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('evolution_metricas')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
+      const response = await fetch('http://localhost:3001/api/evolution-metrics');
+      if (!response.ok) {
+        throw new Error('Failed to fetch evolution metrics');
+      }
+      return response.json();
     },
     refetchInterval: 30000
   });
@@ -75,15 +70,11 @@ const { toast } = useToast();
   const { data: latestKpi } = useQuery({
     queryKey: ['latest-kpi'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('kpi_historico')
-        .select('*')
-        .order('fecha_kpi', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
+      const response = await fetch('http://localhost:3001/api/kpi-historico');
+      if (!response.ok) {
+        throw new Error('Failed to fetch KPI data');
+      }
+      return response.json();
     },
     refetchInterval: 30000
   });
@@ -92,12 +83,11 @@ const { toast } = useToast();
   const { data: previewMessages, isLoading: previewLoading } = useQuery({
     queryKey: ['n8n-messages-preview-simple'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('n8n_mensajes')
-        .select('id, nombre, phone_number, pregunta, fecha_recibido')
-        .order('fecha_recibido', { ascending: false })
-        .limit(6);
-      if (error) throw error;
+      const response = await fetch('http://localhost:3001/api/n8n-messages-preview');
+      if (!response.ok) {
+        throw new Error('Failed to fetch preview messages');
+      }
+      const data = await response.json();
       return (data || []).map((msg: any) => ({ ...msg, id: msg.id.toString() }));
     },
     refetchInterval: 30000,
@@ -107,21 +97,15 @@ const { toast } = useToast();
   const { data: clientControlStats } = useQuery({
     queryKey: ['client-control-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_control')
-        .select('*')
-        .eq('bot_active', false);
-
-      if (error) throw error;
-      
-      const totalBotInactive = data?.length || 0;
-      const withHumanAgent = data?.filter(c => c.human_agent && c.human_agent.trim() !== '').length || 0;
-      const withoutHumanAgent = totalBotInactive - withHumanAgent;
-
+      const response = await fetch('http://localhost:3001/api/client-control-stats/false');
+      if (!response.ok) {
+        throw new Error('Failed to fetch client control stats');
+      }
+      const data = await response.json();
       return {
-        totalBotInactive,
-        withHumanAgent,
-        withoutHumanAgent
+        totalBotInactive: data.total,
+        withHumanAgent: data.withHumanAgent,
+        withoutHumanAgent: data.withoutHumanAgent
       };
     },
     refetchInterval: 30000
@@ -131,21 +115,15 @@ const { toast } = useToast();
   const { data: activeClientControlStats } = useQuery({
     queryKey: ['active-client-control-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_control')
-        .select('*')
-        .eq('bot_active', true);
-
-      if (error) throw error;
-      
-      const totalBotActive = data?.length || 0;
-      const withHumanAgent = data?.filter(c => c.human_agent && c.human_agent.trim() !== '').length || 0;
-      const withoutHumanAgent = totalBotActive - withHumanAgent;
-
+      const response = await fetch('http://localhost:3001/api/client-control-stats/true');
+      if (!response.ok) {
+        throw new Error('Failed to fetch active client control stats');
+      }
+      const data = await response.json();
       return {
-        totalBotActive,
-        withHumanAgent,
-        withoutHumanAgent
+        totalBotActive: data.total,
+        withHumanAgent: data.withHumanAgent,
+        withoutHumanAgent: data.withoutHumanAgent
       };
     },
     refetchInterval: 30000
@@ -155,15 +133,11 @@ const { toast } = useToast();
   const { data: workflowStatus, refetch: refetchWorkflowStatus } = useQuery({
     queryKey: ['workflow-status'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workflow_control')
-        .select('*')
-        .order('last_updated', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
+      const response = await fetch('http://localhost:3001/api/workflow-status');
+      if (!response.ok) {
+        throw new Error('Failed to fetch workflow status');
+      }
+      return response.json();
     },
     refetchInterval: 30000
   });
@@ -172,13 +146,11 @@ const { toast } = useToast();
   const { data: dashboardData } = useQuery({
     queryKey: ['dashboard-secretaria'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_dashboard_secretaria')
-        .select('*')
-        .limit(7);
-
-      if (error) throw error;
-      return data;
+      const response = await fetch('http://localhost:3001/api/dashboard-secretaria');
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard secretaria data');
+      }
+      return response.json();
     },
     refetchInterval: 300000 // 5 minutos
   });
@@ -198,17 +170,19 @@ const { toast } = useToast();
       
       const newStatus = !workflowStatus.is_active;
       
-      const { error } = await supabase
-        .from('workflow_control')
-        .update({
-          is_active: newStatus,
-          updated_by: 'Web Aplicacion',
-          last_updated: new Date().toISOString()
+      const response = await fetch(`http://localhost:3001/api/workflow-status/${workflowStatus.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isActive: newStatus,
+          updatedBy: 'Web Aplicacion'
         })
-        .eq('id', workflowStatus.id);
+      });
 
-      if (error) {
-        console.error('Error updating workflow status:', error);
+      if (!response.ok) {
+        console.error('Error updating workflow status');
         toast({
           title: "Error",
           description: "Error al actualizar el estado del workflow.",

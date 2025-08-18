@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
 import { Workflow, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { loginUser } from '@/lib/auth';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 const Login = () => {
   // Estados para login
@@ -18,49 +19,32 @@ const Login = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuthContext();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoginLoading(true);
 
     try {
-      let loginEmail = identifier;
+      const user = await loginUser(identifier, loginPassword);
 
-      // Si no parece un email, asumir que es un username
-      if (!identifier.includes('@')) {
-        const { data, error: rpcError } = await supabase.rpc('get_email_by_username', {
-          p_username: identifier,
+      if (user) {
+        // Update the global auth context
+        login(user);
+        
+        toast({
+          title: 'Inicio de sesión exitoso',
+          description: '¡Bienvenido de nuevo!',
         });
-
-        if (rpcError || !data) {
-          setLoginLoading(false);
-          toast({
-            title: 'Error al iniciar sesión',
-            description: rpcError?.message || 'Nombre de usuario no encontrado.',
-            variant: 'destructive',
-          });
-          return;
-        }
-        loginEmail = data;
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
-      });
-
-      if (error) {
+        
+        // Navigate to dashboard
+        navigate('/');
+      } else {
         toast({
           title: 'Error al iniciar sesión',
           description: 'Credenciales incorrectas. Por favor, verifica tus datos.',
           variant: 'destructive',
         });
-      } else {
-        toast({
-          title: 'Inicio de sesión exitoso',
-          description: '¡Bienvenido de nuevo!',
-        });
-        navigate('/');
       }
     } catch (error) {
       toast({
@@ -88,11 +72,11 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="identifier">Email o nombre de usuario</Label>
+              <Label htmlFor="identifier">Email</Label>
               <Input
                 id="identifier"
-                type="text"
-                placeholder="tu@email.com o tu_usuario"
+                type="email"
+                placeholder="tu@email.com"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required

@@ -1,8 +1,15 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  getLatestEvolutionMetrics,
+  getLatestKpiHistorico,
+  getMensajesStats,
+  getClientControlStats,
+  getWorkflowStatus,
+  updateWorkflowStatus
+} from '@/lib/database';
 import { 
   BarChart3,
   Shield,
@@ -30,128 +37,42 @@ export const EvolutionMetrics = () => {
   // Obtener datos absolutos de evolution_metricas
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['evolution-metrics'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('evolution_metricas')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getLatestEvolutionMetrics,
     refetchInterval: 30000
   });
 
   // Obtener el último registro de kpi_historico
   const { data: latestKpi } = useQuery({
     queryKey: ['latest-kpi'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('kpi_historico')
-        .select('*')
-        .order('fecha_kpi', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getLatestKpiHistorico,
     refetchInterval: 30000
   });
 
   // Obtener estadísticas de mensajes
   const { data: mensajesStats } = useQuery({
     queryKey: ['mensajes-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mensajes')
-        .select('estado, fecha_envio, fecha_entrega, fecha_lectura');
-
-      if (error) throw error;
-      
-      const total = data?.length || 0;
-      const enviados = data?.filter(m => m.fecha_envio).length || 0;
-      const entregados = data?.filter(m => m.fecha_entrega).length || 0;
-      const leidos = data?.filter(m => m.fecha_lectura).length || 0;
-      const pendientes = data?.filter(m => m.estado === 'pendiente').length || 0;
-      const fallidos = data?.filter(m => m.estado === 'fallido' || m.estado === 'error').length || 0;
-
-      return {
-        total,
-        enviados,
-        entregados,
-        leidos,
-        pendientes,
-        fallidos
-      };
-    },
+    queryFn: getMensajesStats,
     refetchInterval: 30000
   });
 
   // Obtener datos de control de clientes (bot_active = false)
   const { data: clientControlStats } = useQuery({
     queryKey: ['client-control-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_control')
-        .select('*')
-        .eq('bot_active', false);
-
-      if (error) throw error;
-      
-      const totalBotInactive = data?.length || 0;
-      const withHumanAgent = data?.filter(c => c.human_agent && c.human_agent.trim() !== '').length || 0;
-      const withoutHumanAgent = totalBotInactive - withHumanAgent;
-
-      return {
-        totalBotInactive,
-        withHumanAgent,
-        withoutHumanAgent
-      };
-    },
+    queryFn: () => getClientControlStats(false),
     refetchInterval: 30000
   });
 
   // Obtener datos de control de clientes (bot_active = true)
   const { data: activeClientControlStats } = useQuery({
     queryKey: ['active-client-control-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_control')
-        .select('*')
-        .eq('bot_active', true);
-
-      if (error) throw error;
-      
-      const totalBotActive = data?.length || 0;
-      const withHumanAgent = data?.filter(c => c.human_agent && c.human_agent.trim() !== '').length || 0;
-      const withoutHumanAgent = totalBotActive - withHumanAgent;
-
-      return {
-        totalBotActive,
-        withHumanAgent,
-        withoutHumanAgent
-      };
-    },
+    queryFn: () => getClientControlStats(true),
     refetchInterval: 30000
   });
 
   // Obtener estado del workflow
   const { data: workflowStatus, refetch: refetchWorkflowStatus } = useQuery({
     queryKey: ['workflow-status'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workflow_control')
-        .select('*')
-        .order('last_updated', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getWorkflowStatus,
     refetchInterval: 30000
   });
 
@@ -181,24 +102,7 @@ export const EvolutionMetrics = () => {
       // Alternar el estado is_active
       const newStatus = !workflowStatus.is_active;
       
-      const { error } = await supabase
-        .from('workflow_control')
-        .update({
-          is_active: newStatus,
-          updated_by: 'Web Aplicacion',
-          last_updated: new Date().toISOString()
-        })
-        .eq('id', workflowStatus.id);
-
-      if (error) {
-        console.error('Error updating workflow status:', error);
-        toast({
-          title: "Error",
-          description: "Error al actualizar el estado del workflow.",
-          variant: "destructive",
-        });
-        return;
-      }
+      await updateWorkflowStatus(workflowStatus.id, newStatus, 'Web Aplicacion');
 
       // Refrescar los datos
       await refetchWorkflowStatus();

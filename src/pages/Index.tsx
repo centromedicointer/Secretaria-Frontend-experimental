@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { useDashboardPermissions } from '@/hooks/useDashboardPermissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +12,7 @@ import SecurityAlert from '@/components/SecurityAlert';
 
 const Index = () => {
   const navigate = useNavigate();
-  // TEMPORALMENTE DESACTIVADO PARA WEB CRAWLER
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuthContext();
   const { permissions, loading } = useDashboardPermissions();
 
   // Definir todas las tarjetas disponibles
@@ -91,7 +90,7 @@ const Index = () => {
                   Admin
                 </Button>
               )}
-              <Button variant="outline" size="sm" onClick={signOut} className="bg-white/50 backdrop-blur-sm border-white/30 hover:bg-white/70">
+              <Button variant="outline" size="sm" onClick={logout} className="bg-white/50 backdrop-blur-sm border-white/30 hover:bg-white/70">
                 Cerrar Sesión
               </Button>
             </div>

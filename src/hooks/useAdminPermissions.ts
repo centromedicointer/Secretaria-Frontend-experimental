@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import { DashboardType } from './useDashboardPermissions';
 
 interface UserPermission {
@@ -21,30 +21,13 @@ export const useAdminPermissions = () => {
     try {
       setLoading(true);
       
-      // Obtener token de sesión
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      const response = await fetch('http://localhost:3001/api/admin/users');
+      const data = await response.json();
+
+      if (!response.ok) {
         toast({
           title: 'Error',
-          description: 'No hay sesión activa',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Llamar a la función edge
-      const { data, error } = await supabase.functions.invoke('admin-users', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (error) {
-        console.error('Error fetching users:', error);
-        toast({
-          title: 'Error',
-          description: 'No se pudieron cargar los usuarios',
+          description: data.error || 'No se pudieron cargar los usuarios',
           variant: 'destructive',
         });
         return;
@@ -65,41 +48,27 @@ export const useAdminPermissions = () => {
 
   const updatePermission = async (userId: string, dashboardType: DashboardType, hasAccess: boolean) => {
     try {
-      if (hasAccess) {
-        // Otorgar permiso
-        const { error } = await supabase
-          .from('user_dashboard_permissions')
-          .insert({
-            user_id: userId,
-            dashboard_type: dashboardType,
-          });
+      const response = await fetch('http://localhost:3001/api/admin/permissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          dashboardType,
+          hasAccess
+        })
+      });
 
-        if (error) {
-          console.error('Error granting permission:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo otorgar el permiso',
-            variant: 'destructive',
-          });
-          return false;
-        }
-      } else {
-        // Revocar permiso
-        const { error } = await supabase
-          .from('user_dashboard_permissions')
-          .delete()
-          .eq('user_id', userId)
-          .eq('dashboard_type', dashboardType);
+      const data = await response.json();
 
-        if (error) {
-          console.error('Error revoking permission:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo revocar el permiso',
-            variant: 'destructive',
-          });
-          return false;
-        }
+      if (!response.ok) {
+        toast({
+          title: 'Error',
+          description: data.error || 'No se pudo actualizar el permiso',
+          variant: 'destructive',
+        });
+        return false;
       }
 
       toast({

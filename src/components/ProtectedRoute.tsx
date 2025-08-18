@@ -1,30 +1,9 @@
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Navigate, Outlet } from 'react-router-dom';
-import type { Session } from '@supabase/supabase-js';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 const ProtectedRoute = () => {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Configurar listener de cambios de autenticación PRIMERO
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    // LUEGO verificar sesión existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, loading } = useAuthContext();
 
   if (loading) {
     return (
@@ -37,7 +16,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
