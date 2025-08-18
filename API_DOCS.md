@@ -1342,7 +1342,7 @@ DB_POOL_SIZE=10
 # Servidor
 NODE_ENV=production
 PORT=3001
-API_BASE_URL=https://api.centromedico.com
+API_BASE_URL=https://api.ccat.com.mx
 
 # Seguridad
 JWT_SECRET=your-super-secure-jwt-secret-here
@@ -1354,7 +1354,7 @@ RATE_LIMIT_WINDOW=900000  # 15 minutos
 RATE_LIMIT_MAX=100        # 100 requests por ventana
 
 # CORS
-CORS_ORIGIN=https://dashboard.centromedico.com
+CORS_ORIGIN=https://dashboard.ccat.com.mx
 
 # Logs
 LOG_LEVEL=info
