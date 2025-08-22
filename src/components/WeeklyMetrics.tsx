@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAppointmentAnalytics } from '@/hooks/useAppointmentAnalytics';
+import { DataSourceBadge } from '@/components/ui/data-source-badge';
 
 export const WeeklyMetrics = () => {
   const { weeklyMetrics, loading } = useAppointmentAnalytics();
@@ -10,7 +11,12 @@ export const WeeklyMetrics = () => {
 
   return (
     <div className="bg-card rounded-lg shadow-lg p-6">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">📊 Vista Semanal de Citas</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-foreground">📊 Vista Semanal de Citas</h3>
+          <DataSourceBadge source="supabase" />
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {weeklyMetrics.map((week) => (

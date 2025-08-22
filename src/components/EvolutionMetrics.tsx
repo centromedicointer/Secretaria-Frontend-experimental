@@ -27,6 +27,7 @@ import { CallStatsCards } from './metric-cards/CallStatsCards';
 import { KpiStatsCards } from './metric-cards/KpiStatsCards';
 import { MessageDeliveryStatsCards } from './metric-cards/MessageDeliveryStatsCards';
 import { ApiStatusCards } from './metric-cards/ApiStatusCards';
+import { DataSourceBadge } from './ui/data-source-badge';
 import { useToast } from '@/hooks/use-toast';
 
 export const EvolutionMetrics = () => {
@@ -151,6 +152,14 @@ export const EvolutionMetrics = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header con badge de fuente de datos */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-semibold text-gray-900">Métricas de Evolution API</h2>
+          <DataSourceBadge source="postgresql" />
+        </div>
+      </div>
+
       {/* Estado de control y workflow al inicio */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Pacientes con bot desactivado - Now with hover effect */}

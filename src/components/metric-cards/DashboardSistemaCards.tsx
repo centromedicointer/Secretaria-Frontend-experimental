@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { DataSourceBadge } from '@/components/ui/data-source-badge';
 
 interface DashboardSistemaMetrics {
   usuarios_totales: number;
@@ -81,7 +82,14 @@ export const DashboardSistemaCards: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div className="space-y-4">
+        {/* Header con badge de fuente de datos */}
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-gray-900">Métricas del Sistema</h3>
+          <DataSourceBadge source="supabase" />
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="hover:shadow-md transition-shadow cursor-help">
@@ -219,6 +227,7 @@ export const DashboardSistemaCards: React.FC = () => {
             <p className="text-sm">Fecha de la última actualización de los indicadores clave de rendimiento (KPIs) del sistema. Los KPIs se actualizan automáticamente de forma regular.</p>
           </TooltipContent>
         </Tooltip>
+        </div>
       </div>
     </TooltipProvider>
   );

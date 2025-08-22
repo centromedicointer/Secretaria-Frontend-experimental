@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { DataSourceBadge } from '@/components/ui/data-source-badge';
 
 interface DashboardSecretariaMetrics {
   fecha: string;
@@ -84,7 +85,14 @@ export const DashboardSecretariaCards: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="space-y-4">
+        {/* Header con badge de fuente de datos */}
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-gray-900">Dashboard de Secretaria</h3>
+          <DataSourceBadge source="supabase" />
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="hover:shadow-md transition-shadow cursor-help">
@@ -176,6 +184,7 @@ export const DashboardSecretariaCards: React.FC = () => {
             <p className="text-sm">Tiempo promedio que tarda la secretaria IA en responder a los mensajes de los pacientes. Un tiempo bajo indica un servicio eficiente y satisfacción del paciente.</p>
           </TooltipContent>
         </Tooltip>
+        </div>
       </div>
     </TooltipProvider>
   );
